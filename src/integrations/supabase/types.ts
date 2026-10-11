@@ -14,7 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      connections: {
+        Row: {
+          created_at: string
+          id: string
+          match_score: number | null
+          mentee_id: string
+          mentor_id: string | null
+          mentor_key: string
+          mentor_name: string
+          message: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_score?: number | null
+          mentee_id: string
+          mentor_id?: string | null
+          mentor_key: string
+          mentor_name: string
+          message?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_score?: number | null
+          mentee_id?: string
+          mentor_id?: string | null
+          mentor_key?: string
+          mentor_name?: string
+          message?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          account_type: string
+          backgrounds: string[]
+          bio: string | null
+          college: string | null
+          created_at: string
+          full_name: string
+          id: string
+          interests: string[]
+          languages: string[]
+          major: string | null
+        }
+        Insert: {
+          account_type?: string
+          backgrounds?: string[]
+          bio?: string | null
+          college?: string | null
+          created_at?: string
+          full_name?: string
+          id: string
+          interests?: string[]
+          languages?: string[]
+          major?: string | null
+        }
+        Update: {
+          account_type?: string
+          backgrounds?: string[]
+          bio?: string | null
+          college?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          interests?: string[]
+          languages?: string[]
+          major?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
