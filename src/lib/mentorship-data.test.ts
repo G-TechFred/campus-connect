@@ -14,6 +14,6 @@ describe("scoreMatch", () => {
 
   it("gives zero major points across different majors", () => {
     const priya = SAMPLE_MENTORS.find((m) => m.key === "s-priya")!;
-    expect(scoreMatch(DEMO_MENTEE, priya).breakdown[0].points).toBe(0);
+    expect(scoreMatch(DEMO_MENTEE, priya).breakdown[0]?.points).toBe(0);
   });
 });

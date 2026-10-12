@@ -132,7 +132,7 @@ function ProfileEditor() {
       bio: String(f.get("bio")),
       backgrounds: bgs,
     }).eq("id", profile!.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Matching profile saved");
     await refreshProfile();
     qc.invalidateQueries({ queryKey: ["mentors"] });
