@@ -27,7 +27,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [role, setRole] = useState<"mentee" | "mentor">("mentee");
-  const [college, setCollege] = useState<string>(COLLEGES[0]!);
+  const [college, setCollege] = useState<string>(COLLEGES[0] ?? "");
 
   async function signIn(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,7 +37,7 @@ function AuthPage() {
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Welcome back!");
-    navigate({ to: "/" });
+    navigate({ to: "/dashboard" });
   }
 
   async function signUp(e: React.FormEvent<HTMLFormElement>) {
