@@ -13,6 +13,7 @@ export function useMentors() {
   const { user } = useAuth();
   return useQuery({
     queryKey: ["mentors", user?.id ?? "anon"],
+    placeholderData: SAMPLE_MENTORS,
     queryFn: async (): Promise<Mentor[]> => {
       if (!user) return SAMPLE_MENTORS;
       const { data } = await supabase.from("profiles").select("*").eq("account_type", "mentor");
