@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -12,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/auth";
+import { DemoPreviewProvider } from "@/lib/demo-preview";
 import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -82,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "author", content: "Meridian University Student Affairs" },
+      { name: "author", content: "Fred University Student Affairs" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -122,23 +124,26 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const isWelcome = useRouterState({ select: (state) => state.location.pathname === "/" });
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <AuthProvider>
+        <DemoPreviewProvider>
         <TooltipProvider delayDuration={150}>
           <div className="min-h-screen bg-background">
-            <SiteHeader />
-            <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+            {!isWelcome && <SiteHeader />}
+            <main className={isWelcome ? "" : "mx-auto max-w-7xl px-4 py-8 sm:px-6"}>
               <Outlet />
             </main>
-            <footer className="border-t py-8 text-center text-xs text-muted-foreground">
-              Meridian University · Division of Student Affairs · Office of First-Year Experience
-            </footer>
+            {!isWelcome && <footer className="border-t py-8 text-center text-xs text-muted-foreground">
+              Fred University · Division of Student Affairs · Office of First-Year Experience
+            </footer>}
           </div>
           <Toaster richColors position="top-right" />
         </TooltipProvider>
+        </DemoPreviewProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

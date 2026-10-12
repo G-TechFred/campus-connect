@@ -13,9 +13,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useDemoPreview } from "@/lib/demo-preview";
 
 const TABS = [
-  { to: "/", label: "Dashboard" },
+  { to: "/dashboard", label: "Dashboard" },
+  { to: "/advisor", label: "Mentor Management" },
   { to: "/mentors", label: "Find a Mentor" },
   { to: "/matches", label: "My Matches" },
   { to: "/resources", label: "Resource Hub" },
@@ -36,11 +38,13 @@ export function Crest({ className = "h-10 w-10" }: { className?: string }) {
 
 export function SiteHeader() {
   const { user, profile } = useAuth();
+  const { role: demoRole, setRole } = useDemoPreview();
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const roleLabel = !user ? "Guest · Preview" : profile?.account_type === "mentor" ? "Peer Advisor" : "First-Year Mentee";
-  const name = profile?.full_name || (user ? user.email : "Godfred A.");
+  const roleLabel = demoRole ? ({ mentee: "Mentee · Demo", advisor: "Peer Advisor · Demo", administrator: "HESA Administrator · Demo" })[demoRole] : !user ? "Guest · Preview" : profile?.account_type === "mentor" ? "Peer Advisor" : "First-Year Mentee";
+  const name = demoRole ? ({ mentee: "Godfred A.", advisor: "Ama Owusu", administrator: "HESA Staff" })[demoRole] : profile?.full_name || (user ? user.email : "Godfred A.");
+  const tabs = TABS.filter((tab) => tab.to !== "/advisor" || demoRole === "advisor");
 
   async function signOut() {
     await qc.cancelQueries();
@@ -61,16 +65,16 @@ export function SiteHeader() {
         <Link to="/" className="flex items-center gap-3">
           <Crest />
           <div className="leading-tight">
-            <div className="font-display text-lg">Meridian University</div>
+            <div className="font-display text-lg">Fred University</div>
             <div className="text-xs text-primary-foreground/70">Peer Mentorship Network</div>
           </div>
         </Link>
         <nav className="ml-4 hidden flex-1 items-center gap-1 lg:flex">
-          {TABS.map((t) => (
+          {tabs.map((t) => (
             <Link
               key={t.to}
               to={t.to}
-              activeOptions={{ exact: t.to === "/" }}
+              activeOptions={{ exact: true }}
               className="relative rounded-md px-3 py-2 text-sm text-primary-foreground/75 transition-colors hover:bg-primary-foreground/10 hover:text-primary-foreground data-[status=active]:text-primary-foreground data-[status=active]:after:absolute data-[status=active]:after:inset-x-3 data-[status=active]:after:-bottom-[13px] data-[status=active]:after:h-[3px] data-[status=active]:after:rounded-full data-[status=active]:after:bg-accent"
             >
               {t.label}
@@ -95,6 +99,9 @@ export function SiteHeader() {
                 <div className="text-xs font-normal text-muted-foreground">Role: {roleLabel}</div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => { setRole(null); navigate({ to: "/" }); }}>
+                <LogOut className="mr-2 h-4 w-4" /> Return to role selection
+              </DropdownMenuItem>
               {user ? (
                 <>
                   <DropdownMenuItem onClick={() => navigate({ to: "/matches" })}>
@@ -124,12 +131,12 @@ export function SiteHeader() {
       </div>
       {open && (
         <nav className="grid gap-1 border-t border-primary-foreground/10 px-4 py-3 lg:hidden">
-          {TABS.map((t) => (
+          {tabs.map((t) => (
             <Link
               key={t.to}
               to={t.to}
               onClick={() => setOpen(false)}
-              activeOptions={{ exact: t.to === "/" }}
+              activeOptions={{ exact: true }}
               className="rounded-md px-3 py-2 text-sm data-[status=active]:bg-primary-foreground/10 data-[status=active]:text-accent"
             >
               {t.label}

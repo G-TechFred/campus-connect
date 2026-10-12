@@ -7,7 +7,7 @@ import { RESOURCES } from "@/lib/mentorship-data";
 export const Route = createFileRoute("/resources")({
   head: () => ({
     meta: [
-      { title: "Resource Hub · Meridian Peer Mentorship Network" },
+      { title: "Resource Hub · Fred Peer Mentorship Network" },
       { name: "description", content: "Academic, wellbeing, financial and belonging resources for first-year students." },
       { property: "og:title", content: "First-Year Resource Hub" },
       { property: "og:description", content: "Every campus support office for first-year students in one place." },

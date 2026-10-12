@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdvisorRouteImport } from './routes/advisor'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as MentorsRouteImport } from './routes/mentors'
 import { Route as ResourcesRouteImport } from './routes/resources'
@@ -26,9 +28,19 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdvisorRoute = AdvisorRouteImport.update({
+  id: '/advisor',
+  path: '/advisor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchesRoute = MatchesRouteImport.update({
@@ -50,7 +62,9 @@ const ResourcesRoute = ResourcesRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/advisor': typeof AdvisorRoute
   '/auth': typeof AuthRoute
+  '/dashboard': typeof DashboardRoute
   '/matches': typeof MatchesRoute
   '/mentors': typeof MentorsRoute
   '/resources': typeof ResourcesRoute
@@ -58,7 +72,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/advisor': typeof AdvisorRoute
   '/auth': typeof AuthRoute
+  '/dashboard': typeof DashboardRoute
   '/matches': typeof MatchesRoute
   '/mentors': typeof MentorsRoute
   '/resources': typeof ResourcesRoute
@@ -67,21 +83,41 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/advisor': typeof AdvisorRoute
   '/auth': typeof AuthRoute
+  '/dashboard': typeof DashboardRoute
   '/matches': typeof MatchesRoute
   '/mentors': typeof MentorsRoute
   '/resources': typeof ResourcesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/auth' | '/matches' | '/mentors' | '/resources'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/advisor'
+    | '/auth'
+    | '/dashboard'
+    | '/matches'
+    | '/mentors'
+    | '/resources'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/auth' | '/matches' | '/mentors' | '/resources'
+  to:
+    | '/'
+    | '/admin'
+    | '/advisor'
+    | '/auth'
+    | '/dashboard'
+    | '/matches'
+    | '/mentors'
+    | '/resources'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/advisor'
     | '/auth'
+    | '/dashboard'
     | '/matches'
     | '/mentors'
     | '/resources'
@@ -90,7 +126,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AdvisorRoute: typeof AdvisorRoute
   AuthRoute: typeof AuthRoute
+  DashboardRoute: typeof DashboardRoute
   MatchesRoute: typeof MatchesRoute
   MentorsRoute: typeof MentorsRoute
   ResourcesRoute: typeof ResourcesRoute
@@ -112,11 +150,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/advisor': {
+      id: '/advisor'
+      path: '/advisor'
+      fullPath: '/advisor'
+      preLoaderRoute: typeof AdvisorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matches': {
@@ -146,7 +198,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AdvisorRoute: AdvisorRoute,
   AuthRoute: AuthRoute,
+  DashboardRoute: DashboardRoute,
   MatchesRoute: MatchesRoute,
   MentorsRoute: MentorsRoute,
   ResourcesRoute: ResourcesRoute,
