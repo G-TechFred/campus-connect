@@ -27,7 +27,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [role, setRole] = useState<"mentee" | "mentor">("mentee");
-  const [college, setCollege] = useState(COLLEGES[0]);
+  const [college, setCollege] = useState<string>(COLLEGES[0]!);
 
   async function signIn(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -35,7 +35,7 @@ function AuthPage() {
     setBusy(true);
     const { error } = await supabase.auth.signInWithPassword({ email: String(f.get("email")), password: String(f.get("password")) });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Welcome back!");
     navigate({ to: "/" });
   }
@@ -53,7 +53,7 @@ function AuthPage() {
       },
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     if (data.session) navigate({ to: "/matches" });
     else toast.success("Check your inbox to confirm your university email, then sign in.");
   }
