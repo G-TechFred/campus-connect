@@ -9,16 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdvisorRouteImport } from './routes/advisor'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as MentorsRouteImport } from './routes/mentors'
 import { Route as ResourcesRouteImport } from './routes/resources'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdvisorRoute = AdvisorRouteImport.update({
+  id: '/advisor',
+  path: '/advisor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -48,7 +60,9 @@ const ResourcesRoute = ResourcesRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/advisor': typeof AdvisorRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/matches': typeof MatchesRoute
@@ -56,7 +70,9 @@ export interface FileRoutesByFullPath {
   '/resources': typeof ResourcesRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/advisor': typeof AdvisorRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/matches': typeof MatchesRoute
@@ -65,7 +81,9 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/advisor': typeof AdvisorRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
   '/matches': typeof MatchesRoute
@@ -75,12 +93,29 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/admin' | '/auth' | '/dashboard' | '/matches' | '/mentors' | '/resources'
+    | '/'
+    | '/admin'
+    | '/advisor'
+    | '/auth'
+    | '/dashboard'
+    | '/matches'
+    | '/mentors'
+    | '/resources'
   fileRoutesByTo: FileRoutesByTo
-  to: '/admin' | '/auth' | '/dashboard' | '/matches' | '/mentors' | '/resources'
+  to:
+    | '/'
+    | '/admin'
+    | '/advisor'
+    | '/auth'
+    | '/dashboard'
+    | '/matches'
+    | '/mentors'
+    | '/resources'
   id:
     | '__root__'
+    | '/'
     | '/admin'
+    | '/advisor'
     | '/auth'
     | '/dashboard'
     | '/matches'
@@ -89,7 +124,9 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AdvisorRoute: typeof AdvisorRoute
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRoute
   MatchesRoute: typeof MatchesRoute
@@ -99,11 +136,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/advisor': {
+      id: '/advisor'
+      path: '/advisor'
+      fullPath: '/advisor'
+      preLoaderRoute: typeof AdvisorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -145,7 +196,9 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AdvisorRoute: AdvisorRoute,
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
   MatchesRoute: MatchesRoute,
