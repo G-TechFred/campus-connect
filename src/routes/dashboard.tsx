@@ -18,12 +18,12 @@ import { useAuth } from "@/lib/auth";
 import { useConnections, useRankedMentors, useRequestConnection } from "@/lib/use-mentorship";
 import { CHECKINS, MILESTONES } from "@/lib/mentorship-data";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard · Meridian Peer Mentorship Network" },
+      { title: "Dashboard · Fred Peer Mentorship Network" },
       { name: "description", content: "First-year mentee dashboard: smart peer mentor matches, check-ins and transition milestones." },
-      { property: "og:title", content: "Meridian Peer Mentorship Network" },
+      { property: "og:title", content: "Fred Peer Mentorship Network" },
       { property: "og:description", content: "Smart matching between first-year students and trained peer advisors." },
     ],
   }),

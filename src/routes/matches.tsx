@@ -15,7 +15,7 @@ import { BACKGROUNDS } from "@/lib/mentorship-data";
 export const Route = createFileRoute("/matches")({
   head: () => ({
     meta: [
-      { title: "My Matches · Meridian Peer Mentorship Network" },
+      { title: "My Matches · Fred Peer Mentorship Network" },
       { name: "description", content: "Your mentor requests, confirmed matches and matching profile." },
       { property: "og:title", content: "My Mentorship Matches" },
       { property: "og:description", content: "Track mentor requests and confirmed peer matches." },

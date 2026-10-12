@@ -82,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "author", content: "Meridian University Student Affairs" },
+      { name: "author", content: "Fred University Student Affairs" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -134,7 +134,7 @@ function RootComponent() {
               <Outlet />
             </main>
             <footer className="border-t py-8 text-center text-xs text-muted-foreground">
-              Meridian University · Division of Student Affairs · Office of First-Year Experience
+              Fred University · Division of Student Affairs · Office of First-Year Experience
             </footer>
           </div>
           <Toaster richColors position="top-right" />

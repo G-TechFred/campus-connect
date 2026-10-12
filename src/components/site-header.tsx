@@ -61,7 +61,7 @@ export function SiteHeader() {
         <Link to="/" className="flex items-center gap-3">
           <Crest />
           <div className="leading-tight">
-            <div className="font-display text-lg">Meridian University</div>
+            <div className="font-display text-lg">Fred University</div>
             <div className="text-xs text-primary-foreground/70">Peer Mentorship Network</div>
           </div>
         </Link>

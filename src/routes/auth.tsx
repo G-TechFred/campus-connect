@@ -14,9 +14,9 @@ import { COLLEGES } from "@/lib/mentorship-data";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in · Meridian Peer Mentorship Network" },
+      { title: "Sign in · Fred Peer Mentorship Network" },
       { name: "description", content: "Register as a first-year mentee or peer advisor." },
-      { property: "og:title", content: "Join the Meridian Peer Mentorship Network" },
+      { property: "og:title", content: "Join the Fred Peer Mentorship Network" },
       { property: "og:description", content: "Register as a first-year mentee or a peer advisor." },
     ],
   }),
@@ -64,7 +64,7 @@ function AuthPage() {
         <Crest className="h-14 w-14" />
         <div>
           <h1 className="font-display text-3xl">Every first-year deserves a guide.</h1>
-          <p className="mt-3 text-primary-foreground/75">Join 1,200+ students in the Meridian Peer Mentorship Network.</p>
+          <p className="mt-3 text-primary-foreground/75">Join 1,200+ students in the Fred Peer Mentorship Network.</p>
         </div>
         <p className="text-xs text-primary-foreground/60">Office of First-Year Experience</p>
       </div>

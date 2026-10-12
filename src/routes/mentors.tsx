@@ -11,7 +11,7 @@ import { BACKGROUNDS, COLLEGES } from "@/lib/mentorship-data";
 export const Route = createFileRoute("/mentors")({
   head: () => ({
     meta: [
-      { title: "Find a Mentor · Meridian Peer Mentorship Network" },
+      { title: "Find a Mentor · Fred Peer Mentorship Network" },
       { name: "description", content: "Browse peer advisors by college, major, language and lived background." },
       { property: "og:title", content: "Find a Peer Mentor" },
       { property: "og:description", content: "Filter peer advisors by college, major, languages and background." },

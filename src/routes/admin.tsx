@@ -7,7 +7,7 @@ import { SAMPLE_MENTORS } from "@/lib/mentorship-data";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin Portal · Meridian Peer Mentorship Network" },
+      { title: "Admin Portal · Fred Peer Mentorship Network" },
       { name: "description", content: "Program overview for HESA staff: match rates, advisor capacity and retention indicators." },
       { property: "og:title", content: "Mentorship Program Admin Portal" },
       { property: "og:description", content: "Program-level metrics for student affairs staff." },
