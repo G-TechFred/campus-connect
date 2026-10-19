@@ -15,6 +15,8 @@ export const Route = createFileRoute("/mentors")({
       { name: "description", content: "Browse peer advisors by college, major, language and lived background." },
       { property: "og:title", content: "Find a Peer Mentor" },
       { property: "og:description", content: "Filter peer advisors by college, major, languages and background." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: MentorsPage,

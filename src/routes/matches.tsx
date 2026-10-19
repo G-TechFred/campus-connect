@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth";
+import { useDemoPreview } from "@/lib/demo-preview";
 import { useConnections } from "@/lib/use-mentorship";
 import { BACKGROUNDS } from "@/lib/mentorship-data";
 
@@ -19,6 +20,8 @@ export const Route = createFileRoute("/matches")({
       { name: "description", content: "Your mentor requests, confirmed matches and matching profile." },
       { property: "og:title", content: "My Mentorship Matches" },
       { property: "og:description", content: "Track mentor requests and confirmed peer matches." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Matches,
@@ -31,16 +34,6 @@ const statusStyle: Record<string, string> = {
 };
 
 function Matches() {
-  const { user, loading } = useAuth();
-  if (loading) return <p className="text-muted-foreground">Loading…</p>;
-  if (!user)
-    return (
-      <div className="mx-auto max-w-md rounded-xl border bg-card p-8 text-center shadow-card">
-        <h1 className="font-display text-2xl text-primary">Sign in to see your matches</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Register as a mentee or peer advisor to save real matching records.</p>
-        <Button asChild className="mt-5"><Link to="/auth">Sign in or register</Link></Button>
-      </div>
-    );
   return (
     <div className="grid gap-6 lg:grid-cols-5">
       <div className="lg:col-span-3"><ConnectionList /></div>
@@ -51,11 +44,14 @@ function Matches() {
 
 function ConnectionList() {
   const { profile, user } = useAuth();
+  const demo = useDemoPreview();
+  const isGuest = !user || !!demo.role;
   const { data, isLoading } = useConnections();
   const qc = useQueryClient();
-  const isMentor = profile?.account_type === "mentor";
+  const isMentor = demo.role === "advisor" || (!isGuest && profile?.account_type === "mentor");
   const update = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: "accepted" | "declined" }) => {
+      if (isGuest) { demo.updateConnection(id, status); return; }
       const { error } = await supabase.from("connections").update({ status }).eq("id", id);
       if (error) throw error;
     },
@@ -64,6 +60,7 @@ function ConnectionList() {
   });
   const cancel = useMutation({
     mutationFn: async (id: string) => {
+      if (isGuest) { demo.withdrawConnection(id); return; }
       const { error } = await supabase.from("connections").delete().eq("id", id);
       if (error) throw error;
     },
@@ -83,14 +80,14 @@ function ConnectionList() {
       ) : (
         <ul className="mt-5 space-y-3">
           {data.map((c) => {
-            const incoming = c.mentor_id === user?.id;
+             const incoming = isGuest ? isMentor : c.mentor_id === user?.id;
             return (
               <li key={c.id} className="animate-rise flex flex-wrap items-center gap-3 rounded-lg border p-4">
                 <div className="flex-1">
                   <div className="font-medium">{incoming ? "First-year mentee" : c.mentor_name}</div>
                   <div className="text-xs text-muted-foreground">
                     Requested {new Date(c.created_at).toLocaleDateString()} · {c.match_score ?? "—"}% match
-                    {!c.mentor_id && " · sample advisor"}
+                    {isGuest ? " · saved on this device" : !c.mentor_id && " · sample advisor"}
                   </div>
                 </div>
                 <Badge className={statusStyle[c.status]}>{c.status}</Badge>
@@ -115,7 +112,10 @@ function ConnectionList() {
 const split = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
 
 function ProfileEditor() {
-  const { profile, refreshProfile } = useAuth();
+  const { profile: accountProfile, user, refreshProfile } = useAuth();
+  const demo = useDemoPreview();
+  const isGuest = !user || !!demo.role;
+  const profile = isGuest ? demo.guestProfile : accountProfile;
   const qc = useQueryClient();
   const [bgs, setBgs] = useState<string[]>([]);
   useEffect(() => setBgs(profile?.backgrounds ?? []), [profile]);
@@ -123,15 +123,22 @@ function ProfileEditor() {
 
   async function save(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!profile) return;
     const f = new FormData(e.currentTarget);
-    const { error } = await supabase.from("profiles").update({
+    const values = {
       full_name: String(f.get("name")),
       major: String(f.get("major")),
       languages: split(String(f.get("languages"))),
       interests: split(String(f.get("interests"))),
       bio: String(f.get("bio")),
       backgrounds: bgs,
-    }).eq("id", profile!.id);
+    };
+    if (isGuest) {
+      demo.saveProfile({ ...profile, ...values });
+      toast.success("Matching profile saved on this device");
+      return;
+    }
+    const { error } = await supabase.from("profiles").update(values).eq("id", profile.id);
     if (error) { toast.error(error.message); return; }
     toast.success("Matching profile saved");
     await refreshProfile();
@@ -142,7 +149,7 @@ function ProfileEditor() {
     <form onSubmit={save} className="space-y-4 rounded-xl border bg-card p-6 shadow-card">
       <div>
         <h2 className="font-display text-xl text-primary">Matching profile</h2>
-        <p className="text-xs text-muted-foreground">Role: {profile.account_type === "mentor" ? "Peer Advisor" : "First-Year Mentee"} · {profile.college}</p>
+        <p className="text-xs text-muted-foreground">Role: {demo.role === "advisor" || profile.account_type === "mentor" ? "Peer Advisor" : "First-Year Mentee"} · {profile.college}</p>
       </div>
       <div className="space-y-1.5"><Label>Full name</Label><Input name="name" defaultValue={profile.full_name} /></div>
       <div className="space-y-1.5"><Label>Major</Label><Input name="major" defaultValue={profile.major ?? ""} /></div>

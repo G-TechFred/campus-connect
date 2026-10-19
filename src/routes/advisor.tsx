@@ -4,6 +4,7 @@ import { Check, X, Users, CalendarCheck, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useDemoPreview } from "@/lib/demo-preview";
 
 export const Route = createFileRoute("/advisor")({
   head: () => ({ meta: [
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/advisor")({
 });
 
 function AdvisorPreview() {
+  const { connections, guestProfile, updateConnection } = useDemoPreview();
   const [requests, setRequests] = useState([
     { name: "Godfred A.", major: "Business Administration", score: 100, status: "pending" },
     { name: "Akosua B.", major: "Accounting", score: 85, status: "pending" },
@@ -35,6 +37,7 @@ function AdvisorPreview() {
       <section className="border-t pt-6">
         <h2 className="font-display text-xl text-primary">Incoming Mentee Requests</h2>
         <ul className="mt-4 divide-y">
+          {connections.map((r) => <li key={r.id} className="flex flex-wrap items-center gap-4 py-5"><div className="flex-1"><p className="font-semibold">{guestProfile.full_name}</p><p className="mt-1 text-sm text-muted-foreground">Request to {r.mentor_name} · {r.match_score}% match · saved on this device</p></div><Badge variant="secondary">{r.status}</Badge>{r.status === "pending" && <div className="flex gap-2"><Button size="sm" onClick={() => updateConnection(r.id, "accepted")}><Check />Accept</Button><Button size="sm" variant="outline" onClick={() => updateConnection(r.id, "declined")}><X />Decline</Button></div>}</li>)}
           {requests.map((r) => <li key={r.name} className="flex flex-wrap items-center gap-4 py-5"><div className="flex-1"><p className="font-semibold">{r.name}</p><p className="mt-1 text-sm text-muted-foreground">{r.major} · {r.score}% match</p></div><Badge variant="secondary" className={r.status === "accepted" ? "bg-teal-soft text-teal" : ""}>{r.status}</Badge>{r.status === "pending" && <div className="flex gap-2"><Button size="sm" onClick={() => setRequests((rows) => rows.map((row) => row.name === r.name ? { ...row, status: "accepted" } : row))}><Check />Accept</Button><Button size="sm" variant="outline" onClick={() => setRequests((rows) => rows.map((row) => row.name === r.name ? { ...row, status: "declined" } : row))}><X />Decline</Button></div>}</li>)}
         </ul>
       </section>

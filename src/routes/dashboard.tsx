@@ -25,6 +25,8 @@ export const Route = createFileRoute("/dashboard")({
       { name: "description", content: "First-year mentee dashboard: smart peer mentor matches, check-ins and transition milestones." },
       { property: "og:title", content: "Fred Peer Mentorship Network" },
       { property: "og:description", content: "Smart matching between first-year students and trained peer advisors." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Dashboard,

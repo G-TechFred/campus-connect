@@ -11,6 +11,8 @@ export const Route = createFileRoute("/resources")({
       { name: "description", content: "Academic, wellbeing, financial and belonging resources for first-year students." },
       { property: "og:title", content: "First-Year Resource Hub" },
       { property: "og:description", content: "Every campus support office for first-year students in one place." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Resources,

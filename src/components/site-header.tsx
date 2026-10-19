@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronDown, LogOut, Menu, Shield, UserRound, X } from "lucide-react";
+import { ChevronDown, LogOut, Menu, UserRound, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   DropdownMenu,
@@ -102,19 +102,15 @@ export function SiteHeader() {
               <DropdownMenuItem onClick={() => { setRole(null); navigate({ to: "/" }); }}>
                 <LogOut className="mr-2 h-4 w-4" /> Return to role selection
               </DropdownMenuItem>
-              {user ? (
+              <DropdownMenuItem onClick={() => navigate({ to: "/matches" })}>
+                <UserRound className="mr-2 h-4 w-4" /> Matching profile
+              </DropdownMenuItem>
+              {user && !demoRole && (
                 <>
-                  <DropdownMenuItem onClick={() => navigate({ to: "/matches" })}>
-                    <UserRound className="mr-2 h-4 w-4" /> Matching profile
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={signOut}>
                     <LogOut className="mr-2 h-4 w-4" /> Sign out
                   </DropdownMenuItem>
                 </>
-              ) : (
-                <DropdownMenuItem onClick={() => navigate({ to: "/auth" })}>
-                  <Shield className="mr-2 h-4 w-4" /> Sign in or register
-                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
