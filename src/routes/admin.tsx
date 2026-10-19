@@ -19,10 +19,10 @@ export const Route = createFileRoute("/admin")({
 });
 
 const STATS = [
-  { label: "Mentees enrolled", value: "1,248" },
-  { label: "Active peer advisors", value: "186" },
-  { label: "Match rate", value: "92%" },
-  { label: "Fall-to-spring persistence", value: "+7.4 pts" },
+  { label: "First-year mentees enrolled", value: "214" },
+  { label: "Trained peer advisors", value: "38" },
+  { label: "Requests matched within 2 weeks", value: "87%" },
+  { label: "Check-ins completed this term", value: "142" },
 ];
 
 function Admin() {
