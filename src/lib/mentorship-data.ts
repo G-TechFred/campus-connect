@@ -180,13 +180,87 @@ export const MILESTONES = [
   { id: "m6", label: "Register for spring courses", week: "Week 11" },
 ];
 
-export const RESOURCES = [
-  { title: "Academic Success Center", cat: "Academic", desc: "Free tutoring, study skills workshops and supplemental instruction." },
-  { title: "First-Generation Student Hub", cat: "Belonging", desc: "Community lounge, peer circles and a lending library for textbooks." },
-  { title: "International Student Services", cat: "Belonging", desc: "Immigration advising, cultural adjustment programs, host families." },
-  { title: "Counseling & Wellness", cat: "Wellbeing", desc: "Confidential counseling, 24/7 crisis line and mindfulness sessions." },
-  { title: "Financial Aid Office", cat: "Financial", desc: "FAFSA help, emergency micro-grants and work-study placements." },
-  { title: "Career Development Center", cat: "Career", desc: "Résumé reviews, mock interviews and the first-year internship fair." },
-  { title: "Campus Food Pantry", cat: "Financial", desc: "No-questions-asked groceries and toiletries for all students." },
-  { title: "Student Involvement Office", cat: "Engagement", desc: "300+ student organizations, leadership retreats and service trips." },
+export type CampusResource = {
+  title: string;
+  cat: string;
+  desc: string;
+  location: string;
+  hours: string;
+  contact: string;
+  services: string[];
+};
+
+export const RESOURCES: CampusResource[] = [
+  {
+    title: "Academic Success Center",
+    cat: "Academic",
+    desc: "Free tutoring, study skills workshops and supplemental instruction.",
+    location: "Asante Library, 2nd Floor, Room 214",
+    hours: "Mon–Thu 8:00–19:00 · Fri 8:00–16:00",
+    contact: "asc@fred.edu.gh · +233 30 274 0114",
+    services: ["Walk-in tutoring for math, writing and sciences", "Weekly study skills workshops", "Supplemental instruction for gateway courses", "Exam preparation bootcamps before midterms"],
+  },
+  {
+    title: "First-Generation Student Hub",
+    cat: "Belonging",
+    desc: "Community lounge, peer circles and a lending library for textbooks.",
+    location: "Mensah Student Union, Ground Floor, Suite 12",
+    hours: "Mon–Fri 9:00–17:00",
+    contact: "firstgen@fred.edu.gh · +233 30 274 0130",
+    services: ["Textbook lending library (semester loans)", "Thursday first-gen peer circles", "Family orientation materials in Twi, Ga and Ewe", "Staff advocates for navigating university processes"],
+  },
+  {
+    title: "International Student Services",
+    cat: "Belonging",
+    desc: "Immigration advising, cultural adjustment programs, host families.",
+    location: "International House, East Campus",
+    hours: "Mon–Fri 8:30–16:30",
+    contact: "iss@fred.edu.gh · +233 30 274 0158",
+    services: ["Student visa and residence permit advising", "New-arrival airport pickup coordination", "Host family and buddy program", "Cultural adjustment workshops each semester"],
+  },
+  {
+    title: "Counseling & Wellness Center",
+    cat: "Wellbeing",
+    desc: "Confidential counseling, crisis support and mindfulness sessions.",
+    location: "Wellness Building, Room 108 (behind the Health Clinic)",
+    hours: "Mon–Fri 8:00–17:00 · Crisis line evenings & weekends",
+    contact: "wellness@fred.edu.gh · +233 30 274 0191",
+    services: ["Individual counseling (up to 8 sessions per semester)", "Evening crisis line staffed by trained counselors", "Mindfulness and stress management groups", "Referrals to off-campus specialists when needed"],
+  },
+  {
+    title: "Financial Aid Office",
+    cat: "Financial",
+    desc: "Scholarship guidance, emergency micro-grants and work-study placements.",
+    location: "Administration Block, Room 22",
+    hours: "Mon–Fri 9:00–15:30",
+    contact: "finaid@fred.edu.gh · +233 30 274 0102",
+    services: ["Scholarship and bursary application support", "Emergency micro-grants (decisions within 5 working days)", "Work-study job placement on campus", "Budgeting clinics for first-year students"],
+  },
+  {
+    title: "Career Development Center",
+    cat: "Career",
+    desc: "Résumé reviews, mock interviews and the first-year internship fair.",
+    location: "Mensah Student Union, 1st Floor, Room 140",
+    hours: "Mon–Fri 9:00–17:00 · Sat 10:00–13:00 (by appointment)",
+    contact: "careers@fred.edu.gh · +233 30 274 0177",
+    services: ["One-on-one résumé and cover letter reviews", "Mock interviews with feedback", "First-year internship fair each November", "Job shadowing placements with alumni"],
+  },
+  {
+    title: "Campus Food Pantry",
+    cat: "Financial",
+    desc: "No-questions-asked groceries and toiletries for all students.",
+    location: "Akuafo Hall Annex, Rear Entrance",
+    hours: "Tue & Thu 12:00–18:00 · Sat 9:00–12:00",
+    contact: "pantry@fred.edu.gh · +233 30 274 0163",
+    services: ["Weekly grocery pickups (no documentation needed)", "Toiletries and hygiene supplies", "Referrals to emergency meal vouchers", "Volunteer shifts open to all students"],
+  },
+  {
+    title: "Student Involvement Office",
+    cat: "Engagement",
+    desc: "Student organizations, leadership retreats and service trips.",
+    location: "Mensah Student Union, Room 105",
+    hours: "Mon–Fri 9:00–17:00",
+    contact: "getinvolved@fred.edu.gh · +233 30 274 0145",
+    services: ["Directory of 120+ registered student organizations", "Club registration and funding support", "Annual leadership retreat in the Eastern Region", "Community service trip coordination"],
+  },
 ];
