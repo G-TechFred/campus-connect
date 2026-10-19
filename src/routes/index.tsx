@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, GraduationCap, HeartHandshake, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Crest } from "@/components/site-header";
@@ -46,7 +46,7 @@ function WelcomePage() {
               <p className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Peer Mentorship Network</p>
               <div className="my-6 h-px w-12 bg-accent" />
               <h1 id="portal-title" className="font-display text-2xl text-primary sm:text-3xl">Student Affairs Portal</h1>
-              <p className="mt-3 max-w-xs text-sm leading-6 text-muted-foreground">Sign in to access your transition and advising dashboard</p>
+              <p className="mt-3 max-w-xs text-sm leading-6 text-muted-foreground">Access your transition and advising dashboard — no account or password required.</p>
             </div>
             <div className="mt-8 space-y-3">
               {roles.map(({ role, label, icon: Icon, variant }) => (
@@ -58,9 +58,6 @@ function WelcomePage() {
               ))}
             </div>
             <p className="mt-5 text-center text-xs leading-5 text-muted-foreground"><span className="font-semibold text-foreground">Demo Mode:</span> Click any role above to instantly preview the portal.</p>
-            <div className="mt-7 border-t pt-5 text-center">
-              <Button variant="link" asChild className="h-auto py-0 text-xs"><Link to="/auth" onClick={() => setRole(null)}>University account sign in / Register <ArrowRight /></Link></Button>
-            </div>
           </div>
         </section>
       </div>
