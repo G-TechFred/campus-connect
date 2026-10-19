@@ -1,21 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./auth";
+import { useDemoPreview } from "./demo-preview";
 import { DEMO_MENTEE, SAMPLE_MENTORS, scoreMatch, type MenteeProfile, type Mentor } from "./mentorship-data";
 
 const initials = (n: string) =>
-  n.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]!.toUpperCase()).join("") || "PA";
+  n.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "").join("") || "PA";
 
 /** Sample mentors plus every real mentor account in the database. */
 export function useMentors() {
   const { user } = useAuth();
+  const { role } = useDemoPreview();
   return useQuery({
-    queryKey: ["mentors", user?.id ?? "anon"],
+    queryKey: ["mentors", role ? "demo" : user?.id ?? "anon"],
     placeholderData: SAMPLE_MENTORS,
     queryFn: async (): Promise<Mentor[]> => {
-      if (!user) return SAMPLE_MENTORS;
+      if (!user || role) return SAMPLE_MENTORS;
       const { data } = await supabase.from("profiles").select("*").eq("account_type", "mentor");
       const real: Mentor[] = (data ?? [])
         .filter((p) => p.id !== user.id)
@@ -40,7 +41,9 @@ export function useMentors() {
 
 export function useMenteeProfile(): MenteeProfile {
   const { profile } = useAuth();
-  if (!profile || profile.account_type !== "mentee" || !profile.major) return DEMO_MENTEE;
+  const { role, guestProfile } = useDemoPreview();
+  if (role || !profile) return guestProfile;
+  if (profile.account_type !== "mentee" || !profile.major) return DEMO_MENTEE;
   return profile;
 }
 
@@ -55,25 +58,32 @@ export function useRankedMentors() {
 
 export function useConnections() {
   const { user } = useAuth();
-  return useQuery({
+  const demo = useDemoPreview();
+  const isGuest = !user || !!demo.role;
+  const query = useQuery({
     queryKey: ["connections", user?.id],
-    enabled: !!user,
+    enabled: !!user && !demo.role,
     queryFn: async () => {
       const { data, error } = await supabase.from("connections").select("*").order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
+  return isGuest ? { ...query, data: demo.connections, isLoading: !demo.ready } : query;
 }
 
 export function useRequestConnection() {
   const { user, profile } = useAuth();
+  const demo = useDemoPreview();
   const qc = useQueryClient();
-  const navigate = useNavigate();
   const m = useMutation({
     mutationFn: async ({ mentor, score, message }: { mentor: Mentor; score: number; message?: string }) => {
+      if (!user || demo.role) {
+        demo.requestMentor(mentor, score);
+        return;
+      }
       const { error } = await supabase.from("connections").insert({
-        mentee_id: user!.id,
+        mentee_id: user.id,
         mentor_id: mentor.id ?? null,
         mentor_key: mentor.key,
         mentor_name: mentor.name,
@@ -92,12 +102,7 @@ export function useRequestConnection() {
   return {
     ...m,
     request: (mentor: Mentor, score: number) => {
-      if (!user) {
-        toast("Create a free account to request a mentor");
-        navigate({ to: "/auth" });
-        return;
-      }
-      if (profile?.account_type === "mentor") {
+      if (user && !demo.role && profile?.account_type === "mentor") {
         toast.error("Peer advisor accounts can't request mentors.");
         return;
       }
