@@ -1,6 +1,6 @@
 export type Mentor = {
+  id?: string;
   key: string;
-  id?: string; // real account id when the mentor signed up
   name: string;
   initials: string;
   year: string;
@@ -67,12 +67,12 @@ export const SAMPLE_MENTORS: Mentor[] = [
   },
   {
     key: "s-priya",
-    name: "Priya Raman",
-    initials: "PR",
+    name: "Akosua Appiah",
+    initials: "AA",
     year: "Senior",
     college: "College of Engineering",
     major: "Computer Science",
-    languages: ["English", "Tamil", "Hindi"],
+    languages: ["English", "Twi", "Ga"],
     backgrounds: ["International Student Support"],
     interests: ["Software", "Research", "Data Analytics"],
     bio: "Research assistant in the AI lab. Happy to talk study habits, office hours, and landing a first internship.",
@@ -80,12 +80,12 @@ export const SAMPLE_MENTORS: Mentor[] = [
   },
   {
     key: "s-marcus",
-    name: "Marcus Bell",
-    initials: "MB",
+    name: "Kofi Boateng",
+    initials: "KB",
     year: "Junior",
     college: "College of Arts & Sciences",
     major: "Psychology",
-    languages: ["English", "Spanish"],
+    languages: ["English", "Twi"],
     backgrounds: ["First-Generation Advocate", "Student-Athlete"],
     interests: ["Counseling", "Research", "Leadership"],
     bio: "Track & field and peer counselor. Balancing athletics and academics is my specialty.",
@@ -93,12 +93,12 @@ export const SAMPLE_MENTORS: Mentor[] = [
   },
   {
     key: "s-sofia",
-    name: "Sofía Hernández",
-    initials: "SH",
+    name: "Abena Frimpong",
+    initials: "AF",
     year: "Senior",
     college: "College of Health Sciences",
     major: "Nursing",
-    languages: ["English", "Spanish"],
+    languages: ["English", "Twi"],
     backgrounds: ["Transfer Student", "Commuter Student"],
     interests: ["Healthcare", "Community Service"],
     bio: "Transferred from community college. I know how to make a big campus feel small.",
@@ -119,12 +119,12 @@ export const SAMPLE_MENTORS: Mentor[] = [
   },
   {
     key: "s-lena",
-    name: "Lena Fischer",
-    initials: "LF",
+    name: "Kwabena Owusu",
+    initials: "KO",
     year: "Junior",
     college: "College of Education",
     major: "Elementary Education",
-    languages: ["English", "German"],
+    languages: ["English", "Twi"],
     backgrounds: ["LGBTQ+ Ally", "International Student Support"],
     interests: ["Teaching", "Community Service", "Leadership"],
     bio: "Residence hall advisor. Let's find your people through clubs and service.",
@@ -142,25 +142,34 @@ export const DEMO_MENTEE: MenteeProfile = {
 };
 
 export type MatchBreakdown = { label: string; points: number; max: number; detail: string };
+export type MatchingAlgorithm = "balanced" | "college-first";
 
 const overlap = (a: string[] = [], b: string[] = []) => {
   const set = new Set(a.map((x) => x.toLowerCase()));
   return b.filter((x) => set.has(x.toLowerCase()));
 };
 
-/** Score out of 100: major 35, college 15, background 25, interests 15, language 10. */
-export function scoreMatch(mentee: MenteeProfile, mentor: Mentor): { score: number; breakdown: MatchBreakdown[] } {
+/** Score out of 100 using the selected program matching strategy. */
+export function scoreMatch(
+  mentee: MenteeProfile,
+  mentor: Mentor,
+  algorithm: MatchingAlgorithm = "balanced",
+): { score: number; breakdown: MatchBreakdown[] } {
+  const weights =
+    algorithm === "college-first"
+      ? { major: 25, college: 35, background: 20, interests: 12, language: 8 }
+      : { major: 35, college: 15, background: 25, interests: 15, language: 10 };
   const sameMajor = !!mentee.major && mentee.major.toLowerCase() === mentor.major.toLowerCase();
   const sameCollege = !!mentee.college && mentee.college === mentor.college;
   const bg = overlap(mentee.backgrounds, mentor.backgrounds);
   const ints = overlap(mentee.interests, mentor.interests);
   const langs = overlap(mentee.languages, mentor.languages).filter((l) => l !== "English");
   const breakdown: MatchBreakdown[] = [
-    { label: "Academic major", max: 35, points: sameMajor ? 35 : 0, detail: sameMajor ? `Both in ${mentor.major}` : `Mentor studies ${mentor.major}` },
-    { label: "College", max: 15, points: sameCollege ? 15 : 0, detail: mentor.college },
-    { label: "Lived background", max: 25, points: Math.min(25, bg.length * 25), detail: bg.length ? bg.join(", ") : "No shared background" },
-    { label: "Career interests", max: 15, points: Math.min(15, ints.length * 8), detail: ints.length ? ints.join(", ") : "Different interests" },
-    { label: "Languages", max: 10, points: langs.length ? 10 : 0, detail: langs.length ? `Also speaks ${langs.join(", ")}` : "English" },
+    { label: "Academic major", max: weights.major, points: sameMajor ? weights.major : 0, detail: sameMajor ? `Both in ${mentor.major}` : `Mentor studies ${mentor.major}` },
+    { label: "College", max: weights.college, points: sameCollege ? weights.college : 0, detail: mentor.college },
+    { label: "Lived background", max: weights.background, points: Math.min(weights.background, bg.length * weights.background), detail: bg.length ? bg.join(", ") : "No shared background" },
+    { label: "Career interests", max: weights.interests, points: Math.min(weights.interests, ints.length * 8), detail: ints.length ? ints.join(", ") : "Different interests" },
+    { label: "Languages", max: weights.language, points: langs.length ? weights.language : 0, detail: langs.length ? `Also speaks ${langs.join(", ")}` : "English" },
   ];
   return { score: breakdown.reduce((s, b) => s + b.points, 0), breakdown };
 }
@@ -168,7 +177,7 @@ export function scoreMatch(mentee: MenteeProfile, mentor: Mentor): { score: numb
 export const CHECKINS = [
   { id: 1, with: "Ama Owusu", topic: "Week 3: Building your study routine", date: "Tue, Oct 13", time: "4:00 PM", mode: "Video" },
   { id: 2, with: "First-Gen Business Circle", topic: "Group: Navigating office hours", date: "Thu, Oct 15", time: "5:30 PM", mode: "Video" },
-  { id: 3, with: "Advising: Dr. Lindqvist", topic: "Spring course planning", date: "Mon, Oct 19", time: "10:00 AM", mode: "In person · Hall B 204" },
+  { id: 3, with: "Advising: Dr. Akua Osei", topic: "Spring course planning", date: "Mon, Oct 19", time: "10:00 AM", mode: "In person · Hall B 204" },
 ];
 
 export const MILESTONES = [
@@ -181,6 +190,7 @@ export const MILESTONES = [
 ];
 
 export type CampusResource = {
+  id?: string;
   title: string;
   cat: string;
   desc: string;
@@ -188,6 +198,7 @@ export type CampusResource = {
   hours: string;
   contact: string;
   services: string[];
+  appointmentUrl?: string;
 };
 
 export const RESOURCES: CampusResource[] = [

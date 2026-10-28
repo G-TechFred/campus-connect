@@ -1,112 +1,56 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "./auth";
+import { ADMIN_STATE_KEY, readAdminState } from "./admin-data";
 import { useDemoPreview } from "./demo-preview";
-import { DEMO_MENTEE, SAMPLE_MENTORS, scoreMatch, type MenteeProfile, type Mentor } from "./mentorship-data";
+import { DEMO_MENTEE, SAMPLE_MENTORS, scoreMatch, type MatchingAlgorithm, type MenteeProfile, type Mentor } from "./mentorship-data";
 
-const initials = (n: string) =>
-  n.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "").join("") || "PA";
+function getMatchingAlgorithm(): MatchingAlgorithm {
+  if (typeof window === "undefined") return "balanced";
+  try {
+    return readAdminState(window.localStorage.getItem(ADMIN_STATE_KEY)).settings.matchingAlgorithm;
+  } catch {
+    return "balanced";
+  }
+}
 
-/** Sample mentors plus every real mentor account in the database. */
 export function useMentors() {
-  const { user } = useAuth();
-  const { role } = useDemoPreview();
-  return useQuery({
-    queryKey: ["mentors", role ? "demo" : user?.id ?? "anon"],
-    placeholderData: SAMPLE_MENTORS,
-    queryFn: async (): Promise<Mentor[]> => {
-      if (!user || role) return SAMPLE_MENTORS;
-      const { data } = await supabase.from("profiles").select("*").eq("account_type", "mentor");
-      const real: Mentor[] = (data ?? [])
-        .filter((p) => p.id !== user.id)
-        .map((p) => ({
-          key: p.id,
-          id: p.id,
-          name: p.full_name || "Peer Advisor",
-          initials: initials(p.full_name),
-          year: "Peer Advisor",
-          college: p.college ?? "University",
-          major: p.major ?? "Undeclared",
-          languages: p.languages.length ? p.languages : ["English"],
-          backgrounds: p.backgrounds,
-          interests: p.interests,
-          bio: p.bio ?? "Newly registered peer advisor.",
-          capacity: 3,
-        }));
-      return [...real, ...SAMPLE_MENTORS];
-    },
-  });
+  return { data: SAMPLE_MENTORS, isLoading: false };
 }
 
 export function useMenteeProfile(): MenteeProfile {
-  const { profile } = useAuth();
-  const { role, guestProfile } = useDemoPreview();
-  if (role || !profile) return guestProfile;
-  if (profile.account_type !== "mentee" || !profile.major) return DEMO_MENTEE;
-  return profile;
+  const { guestProfile } = useDemoPreview();
+  return guestProfile ?? DEMO_MENTEE;
 }
 
 export function useRankedMentors() {
   const mentee = useMenteeProfile();
-  const q = useMentors();
-  const ranked = (q.data ?? [])
-    .map((m) => ({ mentor: m, ...scoreMatch(mentee, m) }))
+  const { data } = useMentors();
+  const algorithm = getMatchingAlgorithm();
+  const ranked = data
+    .map((mentor) => ({ mentor, ...scoreMatch(mentee, mentor, algorithm) }))
     .sort((a, b) => b.score - a.score);
-  return { ...q, ranked };
+  return { data, isLoading: false, ranked };
 }
 
 export function useConnections() {
-  const { user } = useAuth();
-  const demo = useDemoPreview();
-  const isGuest = !user || !!demo.role;
-  const query = useQuery({
-    queryKey: ["connections", user?.id],
-    enabled: !!user && !demo.role,
-    queryFn: async () => {
-      const { data, error } = await supabase.from("connections").select("*").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
-  return isGuest ? { ...query, data: demo.connections, isLoading: !demo.ready } : query;
+  const { connections, ready } = useDemoPreview();
+  return { data: connections, isLoading: !ready };
 }
 
 export function useRequestConnection() {
-  const { user, profile } = useAuth();
   const demo = useDemoPreview();
-  const qc = useQueryClient();
-  const m = useMutation({
-    mutationFn: async ({ mentor, score, message }: { mentor: Mentor; score: number; message?: string }) => {
-      if (!user || demo.role) {
-        demo.requestMentor(mentor, score);
-        return;
-      }
-      const { error } = await supabase.from("connections").insert({
-        mentee_id: user.id,
-        mentor_id: mentor.id ?? null,
-        mentor_key: mentor.key,
-        mentor_name: mentor.name,
-        match_score: score,
-        message: message ?? null,
-      });
-      if (error) throw error;
-    },
-    onSuccess: (_d, v) => {
-      toast.success(`Request sent to ${v.mentor.name}`);
-      qc.invalidateQueries({ queryKey: ["connections"] });
-    },
-    onError: (e: Error) =>
-      toast.error(e.message.includes("duplicate") ? "You already requested this mentor." : e.message),
-  });
   return {
-    ...m,
+    isPending: false,
     request: (mentor: Mentor, score: number) => {
-      if (user && !demo.role && profile?.account_type === "mentor") {
-        toast.error("Peer advisor accounts can't request mentors.");
+      if (demo.role === "advisor" || demo.role === "administrator") {
+        toast.error("Only mentee previews can request a mentor.");
         return;
       }
-      m.mutate({ mentor, score });
+      if (demo.connections.some((connection) => connection.mentor_key === mentor.key)) {
+        toast.error("You already requested this mentor.");
+        return;
+      }
+      demo.requestMentor(mentor, score);
+      toast.success(`Request sent to ${mentor.name}`);
     },
   };
 }

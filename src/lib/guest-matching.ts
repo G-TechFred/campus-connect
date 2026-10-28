@@ -1,12 +1,35 @@
-import type { Database } from "@/integrations/supabase/types";
 import { DEMO_MENTEE, type Mentor } from "./mentorship-data";
 
-export type GuestConnection = Database["public"]["Tables"]["connections"]["Row"];
-export type GuestProfile = Database["public"]["Tables"]["profiles"]["Row"];
+export type LocalProfile = {
+  id: string;
+  account_type: "mentee" | "mentor";
+  full_name: string;
+  created_at: string;
+  bio: string;
+  college: string | null;
+  major: string | null;
+  languages: string[];
+  backgrounds: string[];
+  interests: string[];
+};
+
+export type GuestConnection = {
+  id: string;
+  mentee_id: string;
+  mentor_id: string | null;
+  mentor_key: string;
+  mentor_name: string;
+  match_score: number;
+  message: string | null;
+  status: "pending" | "accepted" | "declined";
+  created_at: string;
+};
+
+export type GuestProfile = LocalProfile;
 export const GUEST_MATCHING_KEY = "fred-guest-matching-v1";
 export const DEFAULT_GUEST_PROFILE: GuestProfile = {
   ...DEMO_MENTEE,
-  id: "guest-mentee", account_type: "mentee", full_name: "Godfred A.",
+  id: "guest-mentee", account_type: "mentee", full_name: "Kwame Mensah",
   created_at: "", bio: "", college: DEMO_MENTEE.college ?? null,
   major: DEMO_MENTEE.major ?? null, languages: DEMO_MENTEE.languages ?? [],
   backgrounds: DEMO_MENTEE.backgrounds ?? [], interests: DEMO_MENTEE.interests ?? [],

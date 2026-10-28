@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown, LogOut, Menu, UserRound, X } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,9 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
 import { useDemoPreview } from "@/lib/demo-preview";
+import { getRoleNavigation } from "@/lib/role-navigation";
 
 const TABS = [
   { to: "/dashboard", label: "Dashboard" },
@@ -37,21 +35,19 @@ export function Crest({ className = "h-10 w-10" }: { className?: string }) {
 }
 
 export function SiteHeader() {
-  const { user, profile } = useAuth();
-  const { role: demoRole, setRole } = useDemoPreview();
+  const { role: demoRole, setRole, guestProfile } = useDemoPreview();
   const [open, setOpen] = useState(false);
-  const qc = useQueryClient();
   const navigate = useNavigate();
-  const roleLabel = demoRole ? ({ mentee: "Mentee · Demo", advisor: "Peer Advisor · Demo", administrator: "HESA Administrator · Demo" })[demoRole] : !user ? "Guest · Preview" : profile?.account_type === "mentor" ? "Peer Advisor" : "First-Year Mentee";
-  const name = demoRole ? ({ mentee: "Godfred A.", advisor: "Ama Owusu", administrator: "HESA Staff" })[demoRole] : profile?.full_name || (user ? user.email : "Godfred A.");
-  const tabs = TABS.filter((tab) => tab.to !== "/advisor" || demoRole === "advisor");
-
-  async function signOut() {
-    await qc.cancelQueries();
-    qc.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
-  }
+  const roleLabel = demoRole
+    ? ({ mentee: "First-Year Student · Demo", advisor: "Senior Mentor · Demo", administrator: "Administrator · Demo" })[demoRole]
+    : "Guest · Preview";
+  const name = demoRole === "advisor"
+    ? "Ama Owusu"
+    : demoRole === "administrator"
+      ? "HESA Staff"
+      : guestProfile.full_name;
+  const allowedPaths = getRoleNavigation(demoRole);
+  const tabs = TABS.filter((tab) => allowedPaths.includes(tab.to));
 
   return (
     <header className="sticky top-0 z-40 bg-gradient-navy text-primary-foreground shadow-lift">
@@ -65,7 +61,7 @@ export function SiteHeader() {
         <Link to="/" className="flex items-center gap-3">
           <Crest />
           <div className="leading-tight">
-            <div className="font-display text-lg">Fred University</div>
+            <div className="font-display text-lg">Fred Campus Connect</div>
             <div className="text-xs text-primary-foreground/70">Peer Mentorship Network</div>
           </div>
         </Link>
@@ -102,15 +98,10 @@ export function SiteHeader() {
               <DropdownMenuItem onClick={() => { setRole(null); navigate({ to: "/" }); }}>
                 <LogOut className="mr-2 h-4 w-4" /> Return to role selection
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate({ to: "/matches" })}>
-                <UserRound className="mr-2 h-4 w-4" /> Matching profile
-              </DropdownMenuItem>
-              {user && !demoRole && (
-                <>
-                  <DropdownMenuItem onClick={signOut}>
-                    <LogOut className="mr-2 h-4 w-4" /> Sign out
-                  </DropdownMenuItem>
-                </>
+              {demoRole !== "administrator" && (
+                <DropdownMenuItem onClick={() => navigate({ to: "/matches" })}>
+                  <UserRound className="mr-2 h-4 w-4" /> Matching profile
+                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

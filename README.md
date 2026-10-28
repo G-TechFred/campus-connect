@@ -19,7 +19,7 @@ Also build a dedicated "Find a Mentor" directory page where students can filter 
 
 Add a section or tooltip to the mentorship dashboard that references frameworks like Schlossberg’s Transition Theory or Astin’s Theory of Student Involvement to show admissions committees that you understand the academic theory underpinning student affairs.
 
-Link the database with the lovable cloud database so users can actually sign up as a "Mentee" or "Mentor" and store real matching records in a database table
+The portal is a client-side demonstration. Role selection is simulated, and profile edits, mentor requests, and request statuses are stored only in the current browser's local storage. No account, backend database, or shared server persistence is used.
 
 This project was built with [Lovable](https://lovable.dev).
 

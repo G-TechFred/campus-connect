@@ -1,31 +1,29 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { GraduationCap, HeartHandshake } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowLeft, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Crest } from "@/components/site-header";
-import { useDemoPreview } from "@/lib/demo-preview";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [
-    { title: "Enter the Portal · Fred University" },
-    { name: "description", content: "Enter Fred University's mentee or peer advisor portal without an account or password." },
-    { property: "og:title", content: "Fred University · Enter the Portal" },
-    { property: "og:description", content: "Access mentor matching and advising without signing in." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary_large_image" },
-  ] }),
+  head: () => ({
+    meta: [
+      { title: "Portal Access · Fred Campus Connect" },
+      { name: "description", content: "Choose your role and continue to the Fred Campus Connect demo portal." },
+    ],
+  }),
   component: PortalAccess,
 });
 
 function PortalAccess() {
-  const navigate = useNavigate();
-  const { setRole } = useDemoPreview();
-  return <section className="mx-auto max-w-lg space-y-6 rounded-lg border bg-card p-8 text-center shadow-card">
-    <Crest className="mx-auto h-16 w-16" />
-    <h1 className="font-display text-2xl text-primary">Enter the Student Affairs Portal</h1>
-    <p className="text-sm text-muted-foreground">No account or password required.</p>
-    <div className="space-y-3">
-      <Button className="h-auto min-h-14 w-full whitespace-normal" onClick={() => { setRole("mentee"); navigate({ to: "/dashboard" }); }}><GraduationCap />Continue as First Year Mentee</Button>
-      <Button variant="advisor" className="h-auto min-h-14 w-full whitespace-normal" onClick={() => { setRole("advisor"); navigate({ to: "/advisor" }); }}><HeartHandshake />Continue as Senior Peer Advisor</Button>
-    </div>
-  </section>;
+  return (
+    <section className="mx-auto max-w-lg space-y-5 rounded-2xl border bg-card p-8 text-center shadow-card">
+      <Crest className="mx-auto h-16 w-16" />
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-accent">Fred Campus Connect</p>
+        <h1 className="mt-2 font-display text-2xl text-primary">Role-based portal access</h1>
+      </div>
+      <p className="text-sm leading-6 text-muted-foreground">Sign-in and account creation are simulated in this client-only preview. No password is verified, stored, or sent.</p>
+      <Button asChild className="w-full"><Link to="/"><KeyRound className="mr-2 h-4 w-4" />Choose a role to continue</Link></Button>
+      <Button asChild variant="ghost" className="w-full"><Link to="/"><ArrowLeft className="mr-2 h-4 w-4" />Return to welcome page</Link></Button>
+    </section>
+  );
 }

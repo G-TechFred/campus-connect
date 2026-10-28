@@ -1,14 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useAuth } from "@/lib/auth";
 import { useDemoPreview } from "@/lib/demo-preview";
 import { useConnections } from "@/lib/use-mentorship";
 import { BACKGROUNDS } from "@/lib/mentorship-data";
@@ -43,29 +40,9 @@ function Matches() {
 }
 
 function ConnectionList() {
-  const { profile, user } = useAuth();
   const demo = useDemoPreview();
-  const isGuest = !user || !!demo.role;
   const { data, isLoading } = useConnections();
-  const qc = useQueryClient();
-  const isMentor = demo.role === "advisor" || (!isGuest && profile?.account_type === "mentor");
-  const update = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: "accepted" | "declined" }) => {
-      if (isGuest) { demo.updateConnection(id, status); return; }
-      const { error } = await supabase.from("connections").update({ status }).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => { toast.success("Updated"); qc.invalidateQueries({ queryKey: ["connections"] }); },
-    onError: (e: Error) => toast.error(e.message),
-  });
-  const cancel = useMutation({
-    mutationFn: async (id: string) => {
-      if (isGuest) { demo.withdrawConnection(id); return; }
-      const { error } = await supabase.from("connections").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["connections"] }),
-  });
+  const isMentor = demo.role === "advisor";
 
   return (
     <section className="rounded-xl border bg-card p-6 shadow-card">
@@ -80,25 +57,25 @@ function ConnectionList() {
       ) : (
         <ul className="mt-5 space-y-3">
           {data.map((c) => {
-             const incoming = isGuest ? isMentor : c.mentor_id === user?.id;
+            const incoming = isMentor;
             return (
               <li key={c.id} className="animate-rise flex flex-wrap items-center gap-3 rounded-lg border p-4">
                 <div className="flex-1">
                   <div className="font-medium">{incoming ? "First-year mentee" : c.mentor_name}</div>
                   <div className="text-xs text-muted-foreground">
                     Requested {new Date(c.created_at).toLocaleDateString()} · {c.match_score ?? "—"}% match
-                    {isGuest ? " · saved on this device" : !c.mentor_id && " · sample advisor"}
+                    {" · saved on this device"}
                   </div>
                 </div>
                 <Badge className={statusStyle[c.status]}>{c.status}</Badge>
                 {incoming && c.status === "pending" && (
                   <>
-                    <Button size="sm" onClick={() => update.mutate({ id: c.id, status: "accepted" })}>Accept</Button>
-                    <Button size="sm" variant="outline" onClick={() => update.mutate({ id: c.id, status: "declined" })}>Decline</Button>
+                    <Button size="sm" onClick={() => { demo.updateConnection(c.id, "accepted"); toast.success("Request accepted"); }}>Accept</Button>
+                    <Button size="sm" variant="outline" onClick={() => { demo.updateConnection(c.id, "declined"); toast.success("Request declined"); }}>Decline</Button>
                   </>
                 )}
                 {!incoming && c.status === "pending" && (
-                  <Button size="sm" variant="ghost" onClick={() => cancel.mutate(c.id)}>Withdraw</Button>
+                  <Button size="sm" variant="ghost" onClick={() => { demo.withdrawConnection(c.id); toast.success("Request withdrawn"); }}>Withdraw</Button>
                 )}
               </li>
             );
@@ -112,16 +89,12 @@ function ConnectionList() {
 const split = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
 
 function ProfileEditor() {
-  const { profile: accountProfile, user, refreshProfile } = useAuth();
   const demo = useDemoPreview();
-  const isGuest = !user || !!demo.role;
-  const profile = isGuest ? demo.guestProfile : accountProfile;
-  const qc = useQueryClient();
+  const profile = demo.guestProfile;
   const [bgs, setBgs] = useState<string[]>([]);
   useEffect(() => setBgs(profile?.backgrounds ?? []), [profile]);
-  if (!profile) return null;
 
-  async function save(e: React.FormEvent<HTMLFormElement>) {
+  function save(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!profile) return;
     const f = new FormData(e.currentTarget);
@@ -133,16 +106,8 @@ function ProfileEditor() {
       bio: String(f.get("bio")),
       backgrounds: bgs,
     };
-    if (isGuest) {
-      demo.saveProfile({ ...profile, ...values });
-      toast.success("Matching profile saved on this device");
-      return;
-    }
-    const { error } = await supabase.from("profiles").update(values).eq("id", profile.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Matching profile saved");
-    await refreshProfile();
-    qc.invalidateQueries({ queryKey: ["mentors"] });
+    demo.saveProfile({ ...profile, ...values });
+    toast.success("Matching profile saved on this device");
   }
 
   return (

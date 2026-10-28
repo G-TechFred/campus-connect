@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { addGuestConnection, updateGuestConnection, withdrawGuestConnection, DEFAULT_GUEST_PROFILE, GUEST_MATCHING_KEY, type GuestConnection, type GuestProfile } from "./guest-matching";
-import type { Mentor } from "./mentorship-data";
+import { SAMPLE_MENTORS, type Mentor } from "./mentorship-data";
 
 export type DemoRole = "mentee" | "advisor" | "administrator";
 export const DEMO_DESTINATIONS = {
@@ -11,7 +11,7 @@ export const DEMO_DESTINATIONS = {
 
 const DemoContext = createContext<{
   role: DemoRole | null;
-  setRole: (role: DemoRole | null) => void;
+  setRole: (role: DemoRole | null, remember?: boolean) => void;
   connections: GuestConnection[];
   guestProfile: GuestProfile;
   ready: boolean;
@@ -27,16 +27,28 @@ export function DemoPreviewProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<DemoRole | null>(null);
   const [connections, setConnections] = useState<GuestConnection[]>([]);
   const [guestProfile, saveProfile] = useState<GuestProfile>(DEFAULT_GUEST_PROFILE);
+  const [rememberRole, setRememberRole] = useState(true);
   const [ready, setReady] = useState(false);
   useEffect(() => {
     try {
       const stored = JSON.parse(localStorage.getItem(GUEST_MATCHING_KEY) ?? "null");
       if (stored && Array.isArray(stored.connections) && stored.profile?.id === "guest-mentee") {
-        setConnections(stored.connections);
-        saveProfile(stored.profile);
+        const connections = stored.connections.map((connection: GuestConnection) => {
+          if (!connection || typeof connection !== "object") return connection;
+          const mentor = SAMPLE_MENTORS.find((sample) => sample.key === connection.mentor_key);
+          return mentor ? { ...connection, mentor_name: mentor.name } : connection;
+        });
+        const profile = stored.profile.full_name === "Godfred A."
+          ? { ...stored.profile, full_name: DEFAULT_GUEST_PROFILE.full_name }
+          : stored.profile;
+        setConnections(connections);
+        saveProfile(profile);
       }
-      const savedRole = sessionStorage.getItem("fred-preview-role");
-      if (savedRole === "mentee" || savedRole === "advisor" || savedRole === "administrator") setRole(savedRole);
+      const savedRole = localStorage.getItem("fred-preview-role") ?? sessionStorage.getItem("fred-preview-role");
+      if (savedRole === "mentee" || savedRole === "advisor" || savedRole === "administrator") {
+        setRole(savedRole);
+        setRememberRole(localStorage.getItem("fred-preview-role") === savedRole);
+      }
     } catch { /* Unavailable storage must not prevent portal access. */ }
     setReady(true);
   }, []);
@@ -44,11 +56,17 @@ export function DemoPreviewProvider({ children }: { children: ReactNode }) {
     if (!ready) return;
     try {
       localStorage.setItem(GUEST_MATCHING_KEY, JSON.stringify({ connections, profile: guestProfile }));
-      if (role) sessionStorage.setItem("fred-preview-role", role);
+      if (role && rememberRole) localStorage.setItem("fred-preview-role", role);
+      else localStorage.removeItem("fred-preview-role");
+      if (role && !rememberRole) sessionStorage.setItem("fred-preview-role", role);
       else sessionStorage.removeItem("fred-preview-role");
     } catch { /* Continue in memory when storage is unavailable. */ }
-  }, [connections, guestProfile, role, ready]);
-  return <DemoContext.Provider value={{ role, setRole, connections, guestProfile, ready, saveProfile,
+  }, [connections, guestProfile, role, rememberRole, ready]);
+  function chooseRole(nextRole: DemoRole | null, remember = true) {
+    setRole(nextRole);
+    setRememberRole(remember);
+  }
+  return <DemoContext.Provider value={{ role, setRole: chooseRole, connections, guestProfile, ready, saveProfile,
     requestMentor: (mentor, score) => setConnections((rows) => addGuestConnection(rows, mentor, score)),
     updateConnection: (id, status) => setConnections((rows) => updateGuestConnection(rows, id, status)),
     withdrawConnection: (id) => setConnections((rows) => withdrawGuestConnection(rows, id)),
