@@ -7,5 +7,9 @@ export const ROLE_NAVIGATION: Record<DemoRole, readonly string[]> = {
 };
 
 export function getRoleNavigation(role: DemoRole | null): readonly string[] {
-  return ROLE_NAVIGATION[role ?? "mentee"];
+  return role ? ROLE_NAVIGATION[role] : [];
+}
+
+export function canNavigateTo(role: DemoRole | null, path: string): boolean {
+  return getRoleNavigation(role).includes(path);
 }

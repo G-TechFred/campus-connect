@@ -50,8 +50,9 @@ import {
   ADVISOR_NOTES_KEY,
   ADVISOR_STATE_KEY,
   ADVISOR_STUDENT_PROFILES,
-  SAMPLE_ADVISOR_REQUESTS,
   createDefaultAdvisorState,
+  getAdvisorRequests,
+  getAssignedAdvisorMentees,
   getIncomingConnectionStudent,
   readAdvisorNotes,
   readAdvisorState,
@@ -93,42 +94,11 @@ export function AdvisorPreview() {
     }
   }, [advisorState, sessionNotes, storageReady]);
 
-  const requests = useMemo(() => {
-    const sampleRequests = SAMPLE_ADVISOR_REQUESTS.map((request) => ({
-      ...request,
-      status: advisorState.requestStatuses[request.id] ?? request.status,
-    }));
-    const guestRequests = connections.map((connection) => ({
-      id: `connection-${connection.id}`,
-      studentId: connection.mentee_id,
-      student: getIncomingConnectionStudent(connection, guestProfile),
-      matchScore: connection.match_score,
-      status: connection.status,
-      connectionId: connection.id,
-    }));
-    const ids = new Set(guestRequests.map((request) => request.studentId));
-    const names = new Set(
-      guestRequests.map((request) => request.student.name.trim().toLowerCase()),
-    );
-    return [
-      ...guestRequests,
-      ...sampleRequests.filter(
-        (request) =>
-          !ids.has(request.studentId) && !names.has(request.student.name.trim().toLowerCase()),
-      ),
-    ];
-  }, [advisorState.requestStatuses, connections, guestProfile]);
-
-  const assignedMentees = useMemo(() => {
-    const acceptedRequests = requests
-      .filter((request) => request.status === "accepted")
-      .map((request) => request.student);
-    const activeStudent = ADVISOR_STUDENT_PROFILES.find(
-      (student) => student.id === "student-active-01",
-    );
-    const rows = activeStudent ? [activeStudent, ...acceptedRequests] : acceptedRequests;
-    return [...new Map(rows.map((student) => [student.id, student])).values()];
-  }, [requests]);
+  const requests = useMemo(
+    () => getAdvisorRequests(advisorState, connections, guestProfile),
+    [advisorState, connections, guestProfile],
+  );
+  const assignedMentees = useMemo(() => getAssignedAdvisorMentees(requests), [requests]);
   const pendingCount = requests.filter((request) => request.status === "pending").length;
   const upcomingCheckins = advisorState.checkins
     .filter((checkin) => checkin.date >= new Date().toISOString().slice(0, 10))

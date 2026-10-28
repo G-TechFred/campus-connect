@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   ADVISOR_STUDENT_PROFILES,
   createDefaultAdvisorState,
+  getAdvisorRequests,
+  getAssignedAdvisorMentees,
   readAdvisorNotes,
   readAdvisorState,
   updateRequestStatus,
 } from "./advisor-data";
+import { DEFAULT_GUEST_PROFILE } from "./guest-matching";
 
 describe("peer advisor workspace state", () => {
   it("moves an accepted request into the active state and preserves other request statuses", () => {
@@ -27,12 +30,32 @@ describe("peer advisor workspace state", () => {
     expect(readAdvisorState("{invalid")).toEqual(createDefaultAdvisorState());
   });
 
+  it("shows assigned mentees from accepted requests and excludes pending requests", () => {
+    const state = createDefaultAdvisorState();
+    state.requestStatuses["advisor-request-student-01"] = "accepted";
+    const requests = getAdvisorRequests(state, [], DEFAULT_GUEST_PROFILE);
+    const mentees = getAssignedAdvisorMentees(requests);
+
+    expect(mentees.map((mentee) => mentee.id)).toEqual(["student-active-01", "student-01"]);
+  });
+
   it("accepts only well-formed session notes", () => {
-    const notes = [{ id: "n1", studentId: "student-01", studentName: "Godfred A.", date: "2026-10-27", takeaways: "Set a study routine.", theoryFocus: "coping" }];
+    const notes = [
+      {
+        id: "n1",
+        studentId: "student-01",
+        studentName: "Godfred A.",
+        date: "2026-10-27",
+        takeaways: "Set a study routine.",
+        theoryFocus: "coping",
+      },
+    ];
     expect(readAdvisorNotes(JSON.stringify(notes))).toEqual([
       { ...notes[0], studentName: "Kwame Mensah" },
     ]);
     expect(readAdvisorNotes(JSON.stringify([{ id: "bad" }]))).toEqual([]);
-    expect(ADVISOR_STUDENT_PROFILES.some((student) => student.id === "student-active-01")).toBe(true);
+    expect(ADVISOR_STUDENT_PROFILES.some((student) => student.id === "student-active-01")).toBe(
+      true,
+    );
   });
 });

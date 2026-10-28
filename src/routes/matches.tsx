@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,12 +9,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { useDemoPreview } from "@/lib/demo-preview";
 import { useConnections } from "@/lib/use-mentorship";
 import { BACKGROUNDS } from "@/lib/mentorship-data";
+import {
+  ADVISOR_STATE_KEY,
+  createDefaultAdvisorState,
+  getAdvisorRequests,
+  getAssignedAdvisorMentees,
+  readAdvisorState,
+} from "@/lib/advisor-data";
+import { canNavigateTo } from "@/lib/role-navigation";
 
 export const Route = createFileRoute("/matches")({
   head: () => ({
     meta: [
       { title: "My Matches · Fred Peer Mentorship Network" },
-      { name: "description", content: "Your mentor requests, confirmed matches and matching profile." },
+      {
+        name: "description",
+        content: "Your mentor requests, confirmed matches and matching profile.",
+      },
       { property: "og:title", content: "My Mentorship Matches" },
       { property: "og:description", content: "Track mentor requests and confirmed peer matches." },
       { property: "og:type", content: "website" },
@@ -31,10 +42,30 @@ const statusStyle: Record<string, string> = {
 };
 
 function Matches() {
+  const { role } = useDemoPreview();
+  if (!canNavigateTo(role, "/matches")) {
+    return (
+      <section className="rounded-xl border bg-card p-8 text-center shadow-card">
+        <h1 className="font-display text-2xl text-primary">Choose a role to view matches</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          My Matches is available in the mentee and peer advisor previews.
+        </p>
+        <Button asChild className="mt-5">
+          <Link to="/">Return to role selection</Link>
+        </Button>
+      </section>
+    );
+  }
+  if (role === "advisor") return <AdvisorMatches />;
+
   return (
     <div className="grid gap-6 lg:grid-cols-5">
-      <div className="lg:col-span-3"><ConnectionList /></div>
-      <div className="lg:col-span-2"><ProfileEditor /></div>
+      <div className="lg:col-span-3">
+        <ConnectionList />
+      </div>
+      <div className="lg:col-span-2">
+        <ProfileEditor />
+      </div>
     </div>
   );
 }
@@ -46,36 +77,83 @@ function ConnectionList() {
 
   return (
     <section className="rounded-xl border bg-card p-6 shadow-card">
-      <h1 className="font-display text-2xl text-primary">{isMentor ? "Incoming Mentee Requests" : "My Matches"}</h1>
-      <p className="text-sm text-muted-foreground">{isMentor ? "Accept first-year students you have capacity to support." : "Requests you've sent to peer advisors."}</p>
+      <h1 className="font-display text-2xl text-primary">
+        {isMentor ? "Incoming Mentee Requests" : "My Matches"}
+      </h1>
+      <p className="text-sm text-muted-foreground">
+        {isMentor
+          ? "Accept first-year students you have capacity to support."
+          : "Requests you've sent to peer advisors."}
+      </p>
       {isLoading ? (
         <p className="mt-6 text-sm text-muted-foreground">Loading…</p>
       ) : !data?.length ? (
         <div className="mt-6 rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          {isMentor ? "No requests yet — mentees will find you in the directory once your profile is filled in." : (<>No requests yet. <Link to="/mentors" className="font-medium text-accent">Find a mentor →</Link></>)}
+          {isMentor ? (
+            "No requests yet — mentees will find you in the directory once your profile is filled in."
+          ) : (
+            <>
+              No requests yet.{" "}
+              <Link to="/mentors" className="font-medium text-accent">
+                Find a mentor →
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <ul className="mt-5 space-y-3">
           {data.map((c) => {
             const incoming = isMentor;
             return (
-              <li key={c.id} className="animate-rise flex flex-wrap items-center gap-3 rounded-lg border p-4">
+              <li
+                key={c.id}
+                className="animate-rise flex flex-wrap items-center gap-3 rounded-lg border p-4"
+              >
                 <div className="flex-1">
-                  <div className="font-medium">{incoming ? "First-year mentee" : c.mentor_name}</div>
+                  <div className="font-medium">
+                    {incoming ? "First-year mentee" : c.mentor_name}
+                  </div>
                   <div className="text-xs text-muted-foreground">
-                    Requested {new Date(c.created_at).toLocaleDateString()} · {c.match_score ?? "—"}% match
+                    Requested {new Date(c.created_at).toLocaleDateString()} · {c.match_score ?? "—"}
+                    % match
                     {" · saved on this device"}
                   </div>
                 </div>
                 <Badge className={statusStyle[c.status]}>{c.status}</Badge>
                 {incoming && c.status === "pending" && (
                   <>
-                    <Button size="sm" onClick={() => { demo.updateConnection(c.id, "accepted"); toast.success("Request accepted"); }}>Accept</Button>
-                    <Button size="sm" variant="outline" onClick={() => { demo.updateConnection(c.id, "declined"); toast.success("Request declined"); }}>Decline</Button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        demo.updateConnection(c.id, "accepted");
+                        toast.success("Request accepted");
+                      }}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        demo.updateConnection(c.id, "declined");
+                        toast.success("Request declined");
+                      }}
+                    >
+                      Decline
+                    </Button>
                   </>
                 )}
                 {!incoming && c.status === "pending" && (
-                  <Button size="sm" variant="ghost" onClick={() => { demo.withdrawConnection(c.id); toast.success("Request withdrawn"); }}>Withdraw</Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      demo.withdrawConnection(c.id);
+                      toast.success("Request withdrawn");
+                    }}
+                  >
+                    Withdraw
+                  </Button>
                 )}
               </li>
             );
@@ -86,7 +164,69 @@ function ConnectionList() {
   );
 }
 
-const split = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
+function AdvisorMatches() {
+  const { connections, guestProfile, ready } = useDemoPreview();
+  const [advisorState, setAdvisorState] = useState(createDefaultAdvisorState);
+
+  useEffect(() => {
+    try {
+      setAdvisorState(readAdvisorState(window.localStorage.getItem(ADVISOR_STATE_KEY)));
+    } catch {
+      toast.error("Saved advisor assignments could not be loaded from browser storage.");
+    }
+  }, []);
+
+  const requests = useMemo(
+    () => getAdvisorRequests(advisorState, connections, guestProfile),
+    [advisorState, connections, guestProfile],
+  );
+  const mentees = useMemo(() => getAssignedAdvisorMentees(requests), [requests]);
+
+  return (
+    <section className="space-y-5 rounded-xl border bg-card p-6 shadow-card">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.18em] text-accent">Peer Advisor</p>
+          <h1 className="font-display text-2xl text-primary">My Assigned Mentees</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Students with accepted advising connections.
+          </p>
+        </div>
+        <Badge variant="outline">{mentees.length} assigned</Badge>
+      </div>
+      {!ready ? (
+        <p className="text-sm text-muted-foreground">Loading mentees…</p>
+      ) : mentees.length ? (
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {mentees.map((mentee) => (
+            <li key={mentee.id} className="rounded-lg border p-4">
+              <h2 className="font-medium text-primary">{mentee.name}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {mentee.major} · {mentee.college}
+              </p>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Match score: {mentee.matchScore}%
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+          No mentees have been assigned yet.
+        </p>
+      )}
+      <Button asChild variant="outline">
+        <Link to="/advisor">Open advisor workspace</Link>
+      </Button>
+    </section>
+  );
+}
+
+const split = (s: string) =>
+  s
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
 
 function ProfileEditor() {
   const demo = useDemoPreview();
@@ -114,25 +254,60 @@ function ProfileEditor() {
     <form onSubmit={save} className="space-y-4 rounded-xl border bg-card p-6 shadow-card">
       <div>
         <h2 className="font-display text-xl text-primary">Matching profile</h2>
-        <p className="text-xs text-muted-foreground">Role: {demo.role === "advisor" || profile.account_type === "mentor" ? "Peer Advisor" : "First-Year Mentee"} · {profile.college}</p>
+        <p className="text-xs text-muted-foreground">
+          Role:{" "}
+          {demo.role === "advisor" || profile.account_type === "mentor"
+            ? "Peer Advisor"
+            : "First-Year Mentee"}{" "}
+          · {profile.college}
+        </p>
       </div>
-      <div className="space-y-1.5"><Label>Full name</Label><Input name="name" defaultValue={profile.full_name} /></div>
-      <div className="space-y-1.5"><Label>Major</Label><Input name="major" defaultValue={profile.major ?? ""} /></div>
-      <div className="space-y-1.5"><Label>Languages (comma separated)</Label><Input name="languages" defaultValue={profile.languages.join(", ")} placeholder="English, Twi" /></div>
-      <div className="space-y-1.5"><Label>Career interests</Label><Input name="interests" defaultValue={profile.interests.join(", ")} placeholder="Finance, Entrepreneurship" /></div>
+      <div className="space-y-1.5">
+        <Label>Full name</Label>
+        <Input name="name" defaultValue={profile.full_name} />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Major</Label>
+        <Input name="major" defaultValue={profile.major ?? ""} />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Languages (comma separated)</Label>
+        <Input
+          name="languages"
+          defaultValue={profile.languages.join(", ")}
+          placeholder="English, Twi"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Career interests</Label>
+        <Input
+          name="interests"
+          defaultValue={profile.interests.join(", ")}
+          placeholder="Finance, Entrepreneurship"
+        />
+      </div>
       <div className="space-y-1.5">
         <Label>Background</Label>
         <div className="flex flex-wrap gap-2">
           {BACKGROUNDS.map((b) => {
             const on = bgs.includes(b);
             return (
-              <button type="button" key={b} onClick={() => setBgs(on ? bgs.filter((x) => x !== b) : [...bgs, b])}
-                className={`rounded-full border px-3 py-1 text-xs ${on ? "border-accent bg-accent text-accent-foreground" : "hover:border-accent/60"}`}>{b}</button>
+              <button
+                type="button"
+                key={b}
+                onClick={() => setBgs(on ? bgs.filter((x) => x !== b) : [...bgs, b])}
+                className={`rounded-full border px-3 py-1 text-xs ${on ? "border-accent bg-accent text-accent-foreground" : "hover:border-accent/60"}`}
+              >
+                {b}
+              </button>
             );
           })}
         </div>
       </div>
-      <div className="space-y-1.5"><Label>Short bio</Label><Textarea name="bio" rows={3} defaultValue={profile.bio ?? ""} /></div>
+      <div className="space-y-1.5">
+        <Label>Short bio</Label>
+        <Textarea name="bio" rows={3} defaultValue={profile.bio ?? ""} />
+      </div>
       <Button className="w-full">Save profile</Button>
     </form>
   );
