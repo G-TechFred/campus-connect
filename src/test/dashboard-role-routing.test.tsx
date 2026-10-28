@@ -26,15 +26,15 @@ vi.mock("@/lib/use-mentorship", () => ({
   useRequestConnection: () => ({ request: vi.fn(), isPending: false }),
 }));
 
-vi.mock("@/routes/admin", () => ({
+vi.mock("@/components/admin-portal", () => ({
   Admin: () => <div>Administrator analytics workspace</div>,
 }));
 
-vi.mock("@/routes/advisor", () => ({
+vi.mock("@/components/advisor-preview", () => ({
   AdvisorPreview: () => <div>Peer advisor caseload workspace</div>,
 }));
 
-import { Dashboard } from "@/routes/dashboard";
+import { Dashboard } from "@/components/dashboard-page";
 
 describe("role-isolated dashboard route", () => {
   beforeEach(() => {

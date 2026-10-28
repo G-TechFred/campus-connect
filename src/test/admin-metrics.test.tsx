@@ -9,14 +9,17 @@ vi.mock("sonner", () => ({
   toast: { error: vi.fn(), success: vi.fn(), info: vi.fn() },
 }));
 
-import { Admin } from "@/routes/admin";
+import { Admin } from "@/components/admin-portal";
 
 beforeAll(() => {
-  vi.stubGlobal("ResizeObserver", class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  });
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
 });
 
 beforeEach(() => {
@@ -65,6 +68,8 @@ describe("administrator metric drill-downs", () => {
     expect(dialog.getAllByText("Academic Advising")).toHaveLength(3);
     expect(dialog.getAllByText("Peer Mentoring Session")).toHaveLength(3);
     expect(dialog.getAllByText(/Verified/).length).toBe(6);
-    expect(dialog.getByText("Reviewed weekly study blocks and course planning.")).toBeInTheDocument();
+    expect(
+      dialog.getByText("Reviewed weekly study blocks and course planning."),
+    ).toBeInTheDocument();
   });
 });
