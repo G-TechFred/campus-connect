@@ -8,14 +8,13 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { DemoPreviewProvider } from "@/lib/demo-preview";
 import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
   return (
@@ -42,9 +41,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -91,7 +87,7 @@ export const Route = createRootRoute({
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon.svg?v=20261028", type: "image/svg+xml" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -125,18 +121,20 @@ function RootComponent() {
 
   return (
     <DemoPreviewProvider>
-        <TooltipProvider delayDuration={150}>
-          <div className="min-h-screen bg-background">
-            {!isWelcome && <SiteHeader />}
-            <main className={isWelcome ? "" : "mx-auto max-w-7xl px-4 py-8 sm:px-6"}>
-              <Outlet />
-            </main>
-            {!isWelcome && <footer className="border-t py-8 text-center text-xs text-muted-foreground">
+      <TooltipProvider delayDuration={150}>
+        <div className="min-h-screen bg-background">
+          {!isWelcome && <SiteHeader />}
+          <main className={isWelcome ? "" : "mx-auto max-w-7xl px-4 py-8 sm:px-6"}>
+            <Outlet />
+          </main>
+          {!isWelcome && (
+            <footer className="border-t py-8 text-center text-xs text-muted-foreground">
               Fred Campus Connect · Division of Student Affairs · Office of First-Year Experience
-            </footer>}
-          </div>
-          <Toaster richColors position="top-right" />
-        </TooltipProvider>
+            </footer>
+          )}
+        </div>
+        <Toaster richColors position="top-right" />
+      </TooltipProvider>
     </DemoPreviewProvider>
   );
 }
