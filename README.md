@@ -1,35 +1,45 @@
-# Campus Connect
+# 🤝 Campus Connect: Student Mentorship & Peer Advising Matching Platform
 
-Build a responsive web application for a university "First-Year Student Mentorship & Peer Advising Matching Platform" designed for a Higher Education Student Affairs (HESA) department.
+**Campus Connect** is a full-stack digital platform designed to streamline student mentorship, peer advising, and onboarding workflows within educational institutions. By connecting new and continuing students with experienced mentors and academic advisors, the platform fosters a supportive campus community and simplifies institutional support tracking.
 
-Design & Aesthetic Guidelines:
+---
 
-- Adopt an authentic, high-end university portal aesthetic. Use a 60-30-10 color system: crisp institutional white/light slate background, deep university navy blue (#1E3A8A) for headers and primary containers, and a warm collegiate gold/amber (#D97706 or #F59E0B) or academic teal for interactive accents and status badges.
-- Use clean card layouts, generous whitespace, rounded corners (rounded-lg or rounded-xl), subtle drop shadows, and professional typography (such as Inter or system sans-serif).
-- Include an official-looking top navigation bar with a university crest placeholder icon, navigation tabs ("Dashboard", "Find a Mentor", "My Matches", "Resource Hub", "Admin Portal"), and a user profile dropdown indicating "Role: First-Year Mentee" or "Peer Advisor".
+## 🎯 Purpose, Reason & Importance
 
-Core Features to Include on the Main Dashboard:
+### The Challenge (The Reason)
+Transitioning into higher education or navigating critical academic milestones presents severe friction for students. Disjointed communication channels, manual tracking bottlenecks, and a lack of personalized guidance often lead to student isolation, increased anxiety, and avoidable retention risks. On the administrative side, university staff struggle to manage mentor-mentee allocations efficiently using fragmented legacy tools.
 
-1. Welcome Banner: A personalized greeting card for a first-year student ("Welcome to Campus, Godfred! Your transition journey starts here.") with quick status indicators for matching progress.
-2. Smart Match Preview Card: Displays a recommended Peer Mentor match based on academic major (e.g., Business Administration), first-generation college student status, and shared career interests. Include a "View Match Breakdown" and "Request Connection" button.
-3. Quick Action Grid: Clean interactive tiles for "Book Advising Session", "View Campus Resources", "Mentorship Milestone Checklist", and "Submit Feedback".
-4. Active Connections / Upcoming Check-ins Section: A neat list displaying scheduled peer check-ins with date, time, and a video call link placeholder.
+### The Solution & Impact (Its Importance)
+**Campus Connect** was conceptualized to solve these systemic barriers by bridging the gap between student welfare and institutional operations. Robust mentorship and structured peer advising are proven catalysts for **student retention, academic confidence, and holistic personal growth**. 
 
-Make the interface fully interactive with functional tabs, sample student/mentor data arrays so it looks populated immediately, and smooth transitions.
+By introducing an intuitive matching ecosystem, automated onboarding, and role-specific workflows, Campus Connect ensures that:
+*   **Students** receive timely academic and psychological support, making them feel seen and anchored within the university community.
+*   **Administrators** can seamlessly monitor engagement metrics, optimize resource allocation, and ensure student welfare is proactively prioritized rather than reactively managed.
 
-Also build a dedicated "Find a Mentor" directory page where students can filter mentors by college, major, languages spoken, or background (e.g., international student support, first-generation advocates).
+---
 
-Add a section or tooltip to the mentorship dashboard that references frameworks like Schlossberg’s Transition Theory or Astin’s Theory of Student Involvement to show admissions committees that you understand the academic theory underpinning student affairs.
+## ✨ Key Features
 
-The portal is a client-side demonstration. Role selection is simulated, and profile edits, mentor requests, and request statuses are stored only in the current browser's local storage. No account, backend database, or shared server persistence is used.
+*   **Multi-Role Quick-Access Demo Controls:** Built with intuitive demo toggles to allow university reviewers and evaluators to instantly experience the platform from different user perspectives (Student, Mentor, and Administrator).
+*   **Smart Mentorship Matching:** Streamlines the process of pairing incoming or struggling students with qualified peer advisors and faculty mentors.
+*   **Structured Advising Workflows:** Centralized messaging, session scheduling, and guidance tracking to ensure student welfare is actively monitored.
+*   **Clean, Responsive Interface:** Designed with a modern, accessible layout optimized for both desktop and mobile use by busy students and faculty.
 
-## Development
+---
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## 🛠️ Tech Stack & Architecture
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+*   **Frontend:** React, Tailwind CSS, TanStack Router, Framer Motion
+*   **Backend & Database:** Supabase (for authentication, real-time data sync, and secure role-based access control)
+*   **State Management:** Modern component-driven state architecture
+
+💡 About the Creator
+Built by Godfred Mensah — blending a professional background in educational administration, student mentorship, and institutional workflow optimization with modern web development tools.
+
+
+
+
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/G-TechFred/campus-connect.git](https://github.com/G-TechFred/campus-connect.git)
